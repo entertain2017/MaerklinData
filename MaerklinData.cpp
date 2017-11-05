@@ -21,7 +21,7 @@ MaerklinData::MaerklinData(){
 
 
 void MaerklinData::begin(bool debug, bool verbose){
-
+// Setup CAN interface and CAN Filter for receivimg Extended CAN Frames
 	if (debug == true) {
 		DEBUG = true;
 	} else {
@@ -35,10 +35,11 @@ void MaerklinData::begin(bool debug, bool verbose){
 	if (DEBUG == true) {              
 		Serial.println("Function begin... Seting up CAN interface 250000bps");
 	}
+	// Set can interface speed 250000 for Maerklin CAN Bus
 	Can1.begin(250000);
-
 	CAN_filter_t allPassFilter;
 	allPassFilter.id=0;
+	// Set the parameter for extended CAN Frames NEEDED!!
 	allPassFilter.ext=1;
 	allPassFilter.rtr=0;
 
@@ -51,6 +52,7 @@ void MaerklinData::begin(bool debug, bool verbose){
 
 
 void MaerklinData::getLocos(){
+// Call simple functions to get to Loco Data from MS2 (CS2 currently not working)
 if (DEBUG == true) {
 	Serial.println("Function getLocos... will call other functions to walk thru all Locos in MS2/CS2 Database");
 }
@@ -69,11 +71,13 @@ if (DEBUG == true) {
 };
 
 locoDic* MaerklinData::get(){
-return dicArr;
+// Return the collected Data as Struct
+	return dicArr;
 }
 
 
 void MaerklinData::cangetlocoaddr(String data){
+// Send the correct CAN Frame to get Data from MS2 ( works also for CS2.exe)
 
  if (DEBUG == true) { 
   Serial.print("Function cangetlocoddr... will send can frame to get Loco Data [lokinfo]. Will ask for Loco : ");
@@ -90,6 +94,8 @@ void MaerklinData::cangetlocoaddr(String data){
   outMsg1.buf[5] = 0x66;
   outMsg1.buf[6] = 0x6F;
   outMsg1.buf[7] = 0x00;
+
+// Send Frame 1 Message [loknamen]
   Can1.write(outMsg1);
   outMsg1.buf[0] = data[0];
   outMsg1.buf[1] = data[1];
@@ -128,6 +134,7 @@ readcanframes();
 };
 
 void MaerklinData::readcanframes(){
+// Wait for CAN Frame with Ext ID 0x0042EB1B and Store in 3D Byte Array
 if (DEBUG == true) {              
 	Serial.println("Function readcanframes... wait for Loco Data CAN Frames and store it into 3D Byte Array.. ID 0x0042EB1B");
 }
